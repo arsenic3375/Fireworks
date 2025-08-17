@@ -155,6 +155,7 @@ document.addEventListener("click", (event) => {
 
 });
 
+//trying smthn
 function update() {
     background("rgb(0, 0, 0)");
     fireworks.forEach(firework => {
