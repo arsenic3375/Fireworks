@@ -55,7 +55,9 @@ class Smoke {
     draw() {
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, this.radius * (1 - this.age/this.lifespan), 0, Math.PI * 2, true);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.color.slice(3,-1);
+        //ctx.fillStyle = `rgba(${this.color.slice(3,-1)},${this.age/this.lifespan})`;
+        //console.log(`rgba(${this.color.slice(4,-1)},${this.age/this.lifespan})`);
         ctx.fill(); 
         ctx.closePath();
     }
@@ -104,17 +106,19 @@ class Particle {
 }
 
 class Firework {
-    constructor(position, speed, amount, color) {
+    constructor(position, speed, amount, color, lifespan, length) {
         this.position = position
         this.speed = speed
         this.amount = amount;
         this.color = color;
+        this.lifespan = lifespan;
+        this.length = length;
 
         this.particles = [];
         for(let i = 0; i < this.amount; i++) {
             let angle = i*(2*Math.PI)/amount;
             let velocity = new Vector(Math.cos(angle), Math.sin(angle)).scalar(this.speed);
-            let particle = new Particle(i, this.position, 5, this.color, 100, 10)
+            let particle = new Particle(i, this.position, 5, this.color, this.lifespan, this.length)
             particle.velocity = velocity;
             this.particles.push(particle);
         }
@@ -129,6 +133,8 @@ class Firework {
     }
 }
 
+let colors = ["rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,255,0)", "rgb(0,255,255)", "rgb(0,0,255)", "rgb(255,0,255)"]
+
 let fireworks = [];
 
 let mouse = new Point(0, 0);
@@ -139,7 +145,13 @@ document.addEventListener("mousemove", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-    fireworks.push(new Firework(mouse, 5, 20, "red"));
+    fireworks.push(new Firework(
+        mouse, 
+        Math.floor(Math.random() * 2 + 3), 
+        Math.floor(Math.random() * 10 + 10), 
+        colors[Math.floor(Math.random() * colors.length)], 
+        Math.floor(Math.random() * 20 + 30), 
+        Math.floor(Math.random() * 5 + 5)));
 
 });
 
@@ -148,6 +160,16 @@ function update() {
     fireworks.forEach(firework => {
         firework.update();
     });
+
+    if(Math.random() < 1/20) {
+        fireworks.push(new Firework(
+            new Point(Math.random()*canvas.width, Math.random()*canvas.height), 
+            Math.floor(Math.random() * 2 + 3), 
+            Math.floor(Math.random() * 10 + 10), 
+            colors[Math.floor(Math.random() * colors.length)], 
+            Math.floor(Math.random() * 20 + 30), 
+            Math.floor(Math.random() * 5 + 5)));
+    }
 
     fireworks = fireworks.filter(firework => (firework.particles.length > 0))
     requestAnimationFrame(update);
